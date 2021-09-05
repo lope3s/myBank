@@ -10,21 +10,45 @@ import {
   RegisterText,
   ErrorMessage,
   RegisterForm,
+  ActivationContainer,
+  ActivationMessage,
+  ActivationSubText,
+  ActivationButton,
 } from "./style";
 
 import axios from "axios";
 
 import { useState, useRef } from "react";
 
-import { useForm } from "react-hook-form";
+import { set, useForm } from "react-hook-form";
 
 import { BsFillPersonFill } from "react-icons/bs";
 import { RiLockPasswordFill } from "react-icons/ri";
 
 import Logo from "../../images/LogoMyBank.png";
 
+import { useHistory, useParams } from "react-router-dom";
+import { useStoreState, useStoreActions } from "easy-peasy";
+
 const LoginPage = () => {
+  const history = useHistory();
+  const { name } = useStoreState((store) => store);
   const [formState, setFormState] = useState("login");
+  const toggle = useStoreActions((actions) => actions.toggle);
+  const { activationcode } = useParams();
+  console.log(activationcode);
+
+  if (activationcode !== undefined) {
+    console.log(activationcode);
+    axios
+      .get(`http://localhost:5001/apiMyBank/accountActivate/${activationcode}`)
+      .then((res) => {
+        history.push("/mainpage");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
 
   const loginContainer = useRef();
 
@@ -37,7 +61,8 @@ const LoginPage = () => {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log(data);
+    console.log(name);
+
     if (Object.keys(data).length > 2) {
       axios
         .post("http://localhost:5001/apiMyBank/accountRegister", {
@@ -75,6 +100,48 @@ const LoginPage = () => {
         })
         .catch((err) => {
           console.log(err.response);
+          if (err.response.data.message === "") {
+          }
+        });
+    } else {
+      axios
+        .post("http://localhost:5001/apiMyBank/login", {
+          email: data.email,
+          password: data.password,
+        })
+        .then((res) => {
+          toggle(true);
+          history.push("/mainpage");
+        })
+        .catch((err) => {
+          console.log(err.response.data.message);
+          if (err.response.data.message === "Ative sua conta!") {
+            unregister("Registerpassword");
+            unregister("RegisterconfirmPassword");
+            unregister("Registeremail");
+            unregister("Registernome");
+            unregister("email");
+            unregister("password");
+            setTimeout(() => {
+              setFormState("ActiveAcount");
+              unregister("Registerpassword");
+              unregister("RegisterconfirmPassword");
+              unregister("Registeremail");
+              unregister("Registernome");
+              unregister("email");
+              unregister("password");
+            }, 200);
+
+            loginContainer.current?.animate(
+              [
+                {
+                  transform: "rotateY(0)",
+                },
+                { transform: "rotateY(360deg)" },
+              ],
+              { duration: 1000 }
+            );
+          }
         });
     }
     // axios.post("http://localhost:5001/apiMyBank/login", data);
@@ -85,7 +152,10 @@ const LoginPage = () => {
       <MainContainer>
         <LoginContainer ref={loginContainer}>
           <img alt="logo" src={Logo}></img>
-          <LoginText>Preencha Para Logar</LoginText>
+          {formState === "login" && !activationcode && (
+            <LoginText>Preencha Para Logar</LoginText>
+          )}
+          {activationcode && <LoginText>Conta Ativada</LoginText>}
           {formState === "login" && (
             <LoginForm autocomplete="off" onSubmit={handleSubmit(onSubmit)}>
               <InputContainer>
@@ -178,6 +248,33 @@ const LoginPage = () => {
                 <LogarText>Cadastrar</LogarText>
               </LoginButton>
             </RegisterForm>
+          )}
+          {formState === "ActiveAcount" && (
+            <ActivationContainer>
+              <ActivationMessage>
+                Enviamos um email de ativacao de conta
+              </ActivationMessage>
+              <ActivationSubText>Verifique seu email</ActivationSubText>
+              <ActivationButton
+                onClick={() => {
+                  setTimeout(() => {
+                    setFormState("login");
+                  }, 200);
+
+                  loginContainer.current?.animate(
+                    [
+                      {
+                        transform: "rotateY(0)",
+                      },
+                      { transform: "rotateY(360deg)" },
+                    ],
+                    { duration: 1000 }
+                  );
+                }}
+              >
+                <LogarText>Voltar ao Login</LogarText>
+              </ActivationButton>
+            </ActivationContainer>
           )}
           {formState === "login" && (
             <RegisterText
