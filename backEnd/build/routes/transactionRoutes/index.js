@@ -39,27 +39,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.transactionRoute = void 0;
 var express_1 = __importDefault(require("express"));
-var cors_1 = __importDefault(require("cors"));
-var accountsRoutes_1 = require("./routes/accountsRoutes");
-var goalsRoutes_1 = require("./routes/goalsRoutes");
-var transactionRoutes_1 = require("./routes/transactionRoutes");
-var db_1 = require("./db");
-var body_parser_1 = __importDefault(require("body-parser"));
-var app = (0, express_1.default)();
-app.use((0, cors_1.default)());
-app.use(body_parser_1.default.json());
-app.use('/apiMyBank', accountsRoutes_1.accountRoute);
-app.use('/apiMyBank', goalsRoutes_1.goalRoute);
-app.use('/apiMyBank/', transactionRoutes_1.transactionRoute);
-app.listen(5001, function () { return __awaiter(void 0, void 0, void 0, function () {
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, (0, db_1.main)()];
+var db_1 = require("../../db");
+var mongodb_1 = require("mongodb");
+var db = db_1.client.db();
+exports.transactionRoute = express_1.default.Router();
+exports.transactionRoute.post('/createTransaction', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, type, value, userId, goalId_1, treatedValue, transactionObject, user, transactionGoal, goals, err_1;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 4, , 5]);
+                _a = req.body, type = _a.type, value = _a.value, userId = _a.userId, goalId_1 = _a.goalId;
+                treatedValue = type === 'Withdraw' ? -1 * value : value;
+                transactionObject = {
+                    userId: new mongodb_1.ObjectId(userId),
+                    goalId: goalId_1,
+                    type: type,
+                    value: treatedValue,
+                    date: new Date()
+                };
+                return [4 /*yield*/, db.collection('transactions').insertOne(transactionObject)];
             case 1:
-                _a.sent();
-                console.log("\nServer running on port 5001");
-                return [2 /*return*/];
+                _b.sent();
+                return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
+            case 2:
+                user = _b.sent();
+                debugger;
+                transactionGoal = user.goals.find(function (goal) { return goal.goalId === parseInt(goalId_1); });
+                if (!transactionGoal) {
+                    return [2 /*return*/, res.status(404).send({ message: 'Meta inexistente' }).end()];
+                }
+                transactionGoal["totalValue"] += treatedValue;
+                goals = user.goals.filter(function (goal) { return goal.goalId !== parseInt(goalId_1); });
+                goals.push(transactionGoal);
+                return [4 /*yield*/, db.collection('users').updateOne({ userId: new mongodb_1.ObjectId(userId) }, { $set: { goals: goals } })];
+            case 3:
+                _b.sent();
+                return [2 /*return*/, res.status(201).send({ message: 'Transação efetivada!' }).end()];
+            case 4:
+                err_1 = _b.sent();
+                console.log(err_1);
+                return [2 /*return*/, res.status(400).send({ message: "missing fields" }).end()];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
