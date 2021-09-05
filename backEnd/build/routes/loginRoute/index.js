@@ -39,49 +39,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transactionRoute = void 0;
+exports.loginRoute = void 0;
 var express_1 = __importDefault(require("express"));
 var db_1 = require("../../db");
-var mongodb_1 = require("mongodb");
+var passwordHash_1 = __importDefault(require("../../services/passwordHash"));
 var db = db_1.client.db();
-exports.transactionRoute = express_1.default.Router();
-exports.transactionRoute.post('/createTransaction', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, type, value, userId, goalId_1, treatedValue, transactionObject, user, transactionGoal, goals, err_1;
+exports.loginRoute = express_1.default.Router();
+exports.loginRoute.post('/login', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, email, password, user, err_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
-                _b.trys.push([0, 4, , 5]);
-                _a = req.body, type = _a.type, value = _a.value, userId = _a.userId, goalId_1 = _a.goalId;
-                treatedValue = type === 'Withdraw' ? -1 * value : value;
-                transactionObject = {
-                    userId: new mongodb_1.ObjectId(userId),
-                    goalId: goalId_1,
-                    type: type,
-                    value: treatedValue,
-                    date: new Date()
-                };
-                return [4 /*yield*/, db.collection('transactions').insertOne(transactionObject)];
+                _b.trys.push([0, 2, , 3]);
+                _a = req.body, email = _a.email, password = _a.password;
+                return [4 /*yield*/, db.collection('login').aggregate([
+                        {
+                            $match: {
+                                email: email,
+                                password: (0, passwordHash_1.default)(password),
+                            },
+                        },
+                    ])];
             case 1:
-                _b.sent();
-                return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
-            case 2:
                 user = _b.sent();
-                transactionGoal = user.goals.find(function (goal) { return goal.goalId === parseInt(goalId_1); });
-                if (!transactionGoal) {
-                    return [2 /*return*/, res.status(404).send({ message: 'Meta inexistente' }).end()];
-                }
-                transactionGoal["totalValue"] += treatedValue;
-                goals = user.goals.filter(function (goal) { return goal.goalId !== parseInt(goalId_1); });
-                goals.push(transactionGoal);
-                return [4 /*yield*/, db.collection('users').updateOne({ userId: new mongodb_1.ObjectId(userId) }, { $set: { goals: goals } })];
-            case 3:
-                _b.sent();
-                return [2 /*return*/, res.status(201).send({ message: 'Transação efetivada!' }).end()];
-            case 4:
+                debugger;
+                return [3 /*break*/, 3];
+            case 2:
                 err_1 = _b.sent();
                 console.log(err_1);
-                return [2 /*return*/, res.status(400).send({ message: "missing fields" }).end()];
-            case 5: return [2 /*return*/];
+                return [2 /*return*/, res.status(400).send({ message: 'invalid fields' }).end()];
+            case 3: return [2 /*return*/];
         }
     });
 }); });
