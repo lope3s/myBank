@@ -13,11 +13,8 @@ import MenuIcon from "@material-ui/icons/Menu";
 import ChevronLeftIcon from "@material-ui/icons/ChevronLeft";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ListItem from "@material-ui/core/ListItem";
-import ListItemIcon from "@material-ui/core/ListItemIcon";
-import ListItemText from "@material-ui/core/ListItemText";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
 
+import { useStoreState, useStoreActions } from "easy-peasy";
 import { MdCreateNewFolder, MdKeyboardArrowLeft } from "react-icons/md";
 import { BiLogOutCircle } from "react-icons/bi";
 
@@ -99,6 +96,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function PersistentDrawerLeft(props) {
+  const toggle = useStoreActions((actions) => actions.toggle);
   const classes = useStyles();
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
@@ -158,7 +156,13 @@ export default function PersistentDrawerLeft(props) {
             <MdCreateNewFolder color="white" fontSize="2rem" />
             <TableItem color="white" primary={"Nova Meta"} />
           </ListItem>
-          <ListItem button key={"Logout"}>
+          <ListItem
+            button
+            key={"Logout"}
+            onClick={() => {
+              toggle();
+            }}
+          >
             <BiLogOutCircle color="white" fontSize="2rem" />
             <TableItem color="white" primary={"Logout"} />
           </ListItem>

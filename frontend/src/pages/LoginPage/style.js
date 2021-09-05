@@ -128,3 +128,41 @@ export const RegisterForm = styled.form`
   align-items: center;
   justify-content: space-around;
 `;
+
+export const ActivationContainer = styled.div`
+  width: 100%;
+  height: 17rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const ActivationMessage = styled.h2`
+  font-family: "Red Hat Display", sans-serif;
+  font-weight: normal;
+  font-size: 25px;
+  margin: 2rem 0 1rem 0;
+`;
+
+export const ActivationSubText = styled.p`
+  font-family: "Red Hat Display";
+  font-style: normal;
+  font-weight: normal;
+  font-size: 18px;
+  color: #8a9dff;
+`;
+
+export const ActivationButton = styled(Button)`
+  all: unset;
+  width: 80%;
+  height: 3rem;
+  background-color: #00d595 !important;
+  border-radius: 10px;
+  border: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin: 6rem 0 !important;
+`;

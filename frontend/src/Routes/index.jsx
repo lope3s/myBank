@@ -10,11 +10,13 @@ const Routes = () => {
         {/* A <Switch> looks through its children <Route>s and
             renders the first one that matches the current URL. */}
         <Switch>
-          <Route path="/about"></Route>
-          <Route path="/mainpage">
+          <Route path="/:activationcode">
+            <LoginPage />
+          </Route>
+          <Route exact path="/mainpage">
             <MainPage />
           </Route>
-          <Route path="/">
+          <Route exact path="/login">
             <LoginPage />
           </Route>
         </Switch>

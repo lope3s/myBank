@@ -2,13 +2,13 @@ import { MainContainer, ContentContainer } from "./style";
 import PersistentDrawerLeft from "../../components/menu";
 import TaskCard from "../../components/TaskCard";
 import { useHistory } from "react-router-dom";
-import { useStore } from "easy-peasy";
+import { useStoreState } from "easy-peasy";
 
 const MainPage = () => {
   const history = useHistory();
-  const user = useStore();
+  const { isLogged } = useStoreState((store) => store);
 
-  if (user.getState().user[0].isLogged === false) {
+  if (isLogged === false) {
     history.push("/");
   }
   //   console.log(user.getState().user[0].isLogged);
