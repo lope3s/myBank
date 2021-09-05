@@ -65,7 +65,9 @@ exports.accountRoute.post('/accountRegister', function (req, res) { return __awa
                     db.collection("login").insertOne({
                         email: email_1,
                         password: passHash,
-                        isValidated: false
+                        isValidated: false,
+                        isLogged: false,
+                        token: ''
                     }).then(function (resp) {
                         db.collection("users").insertOne({
                             userId: resp.insertedId,

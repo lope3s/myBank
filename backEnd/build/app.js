@@ -47,14 +47,14 @@ var transactionRoutes_1 = require("./routes/transactionRoutes");
 var db_1 = require("./db");
 var body_parser_1 = __importDefault(require("body-parser"));
 var mailerService_1 = require("./services/mailerService");
-var loginRoute_1 = require("./routes/loginRoute");
+var accesRoutes_1 = require("./routes/accesRoutes");
 var app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
 app.use('/apiMyBank', accountsRoutes_1.accountRoute);
 app.use('/apiMyBank', goalsRoutes_1.goalRoute);
 app.use('/apiMyBank/', transactionRoutes_1.transactionRoute);
-app.use('/apiMyBank', loginRoute_1.loginRoute);
+app.use('/apiMyBank', accesRoutes_1.accessRoute);
 app.listen(5001, function () { return __awaiter(void 0, void 0, void 0, function () {
     var transporter;
     return __generator(this, function (_a) {
