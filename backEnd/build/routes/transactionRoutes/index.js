@@ -66,6 +66,9 @@ exports.transactionRoute.post('/createTransaction', function (req, res) { return
                 return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
             case 2:
                 user = _b.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(404).send({ message: 'user does not exist' }).end()];
+                }
                 transactionGoal = user.goals.find(function (goal) { return goal.goalId === parseInt(goalId_1); });
                 if (!transactionGoal) {
                     return [2 /*return*/, res.status(404).send({ message: 'Meta inexistente' }).end()];
@@ -82,6 +85,33 @@ exports.transactionRoute.post('/createTransaction', function (req, res) { return
                 console.log(err_1);
                 return [2 /*return*/, res.status(400).send({ message: "missing fields" }).end()];
             case 5: return [2 /*return*/];
+        }
+    });
+}); });
+exports.transactionRoute.get('/transactionList/:userId/:goalId', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, userId, goalId, user, test;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _a = req.params, userId = _a.userId, goalId = _a.goalId;
+                return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
+            case 1:
+                user = _b.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(404).send({ message: 'user does not exist' }).end()];
+                }
+                return [4 /*yield*/, db.collection('transactions').aggregate([
+                        {
+                            $match: {
+                                userId: new mongodb_1.ObjectId(userId),
+                                goalId: parseInt(goalId)
+                            }
+                        }
+                    ]).toArray()];
+            case 2:
+                test = _b.sent();
+                debugger;
+                return [2 /*return*/];
         }
     });
 }); });
