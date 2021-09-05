@@ -39,49 +39,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.transactionRoute = void 0;
-var express_1 = __importDefault(require("express"));
-var db_1 = require("../../db");
-var mongodb_1 = require("mongodb");
-var db = db_1.client.db();
-exports.transactionRoute = express_1.default.Router();
-exports.transactionRoute.post('/createTransaction', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, type, value, userId, goalId_1, treatedValue, transactionObject, user, transactionGoal, goals, err_1;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                _b.trys.push([0, 4, , 5]);
-                _a = req.body, type = _a.type, value = _a.value, userId = _a.userId, goalId_1 = _a.goalId;
-                treatedValue = type === 'Withdraw' ? -1 * value : value;
-                transactionObject = {
-                    userId: new mongodb_1.ObjectId(userId),
-                    goalId: goalId_1,
-                    type: type,
-                    value: treatedValue,
-                    date: new Date()
-                };
-                return [4 /*yield*/, db.collection('transactions').insertOne(transactionObject)];
+exports.sendMail = exports.makeTransport = void 0;
+var nodemailer_1 = require("nodemailer");
+var googleapis_1 = require("googleapis");
+var makeHtml_1 = __importDefault(require("./makeHtml"));
+var oAuthCli = new googleapis_1.google.auth.OAuth2(process.env.OAUTH_CLIENT_ID, process.env.OAUTH_CLIENT_SECRET, process.env.OAUTH_REDIRECT_URI);
+oAuthCli.setCredentials({ refresh_token: process.env.OAUTH_REFRESH_TOKEN });
+var makeTransport = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var accesToken, transporter;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, oAuthCli.getAccessToken()];
             case 1:
-                _b.sent();
-                return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
-            case 2:
-                user = _b.sent();
-                transactionGoal = user.goals.find(function (goal) { return goal.goalId === parseInt(goalId_1); });
-                if (!transactionGoal) {
-                    return [2 /*return*/, res.status(404).send({ message: 'Meta inexistente' }).end()];
-                }
-                transactionGoal["totalValue"] += treatedValue;
-                goals = user.goals.filter(function (goal) { return goal.goalId !== parseInt(goalId_1); });
-                goals.push(transactionGoal);
-                return [4 /*yield*/, db.collection('users').updateOne({ userId: new mongodb_1.ObjectId(userId) }, { $set: { goals: goals } })];
-            case 3:
-                _b.sent();
-                return [2 /*return*/, res.status(201).send({ message: 'Transação efetivada!' }).end()];
-            case 4:
-                err_1 = _b.sent();
-                console.log(err_1);
-                return [2 /*return*/, res.status(400).send({ message: "missing fields" }).end()];
-            case 5: return [2 /*return*/];
+                accesToken = _a.sent();
+                transporter = (0, nodemailer_1.createTransport)({
+                    host: 'smtp.gmail.com',
+                    port: 465,
+                    secure: true,
+                    auth: {
+                        type: 'OAuth2',
+                        user: process.env.MAILER_USER,
+                        clientId: process.env.OAUTH_CLIENT_ID,
+                        clientSecret: process.env.OAUTH_CLIENT_SECRET,
+                        refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+                        accessToken: accesToken
+                    }
+                });
+                return [2 /*return*/, transporter];
         }
     });
-}); });
+}); };
+exports.makeTransport = makeTransport;
+var sendMail = function (to, activateUrl) { return __awaiter(void 0, void 0, void 0, function () {
+    var transporter, message;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, (0, exports.makeTransport)()];
+            case 1:
+                transporter = _a.sent();
+                message = {
+                    from: 'MyBank <mybankmailerservice@gmail.com>',
+                    to: to,
+                    subject: "Account Activate",
+                    html: (0, makeHtml_1.default)(to, activateUrl)
+                };
+                return [4 /*yield*/, transporter.sendMail(message)];
+            case 2:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+exports.sendMail = sendMail;

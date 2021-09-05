@@ -3,6 +3,7 @@ import { client } from '../../db';
 import checkUserService from '../../services/checkUserService';
 import passwordHash from '../../services/passwordHash';
 import { ObjectId } from 'mongodb';
+import { sendMail } from '../../services/mailerService';
 
 const db = client.db();
 export const accountRoute = express.Router();
@@ -20,7 +21,10 @@ accountRoute.post('/accountRegister', async (req, res) => {
         if(!userAlreadyExist){
             db.collection("login").insertOne({
                 email: email,
-                password: passHash        
+                password: passHash,
+                isValidated: false,
+                isLogged: false,
+                token: ''
             }).then((resp) => {                
                 db.collection("users").insertOne({
                     userId: resp.insertedId,
@@ -28,9 +32,9 @@ accountRoute.post('/accountRegister', async (req, res) => {
                     goals: []
                 })
 
-            })
+                sendMail(email, `https://localhost:5001/apiMyBank/accountActivate/${resp.insertedId}`)
 
-            //adicionar o serviço de mailer
+            })
 
             return res.status(201).send({message: 'Usuários registrado!'}).end()
         }
@@ -43,7 +47,7 @@ accountRoute.post('/accountRegister', async (req, res) => {
     }
 })
 
-accountRoute.delete('/accoutDelete/:id', async (req, res) => {
+accountRoute.delete('/accountDelete/:id', async (req, res) => {
     try {
         const { id } = req.params
         await db.collection('login').deleteOne({_id: new ObjectId(id)})
@@ -55,8 +59,8 @@ accountRoute.delete('/accoutDelete/:id', async (req, res) => {
 
         await db.collection('users').deleteOne({userId: new ObjectId(id)})
 
-        //adicionar o delete em transações da conta
-        
+        await db.collection('transactions').deleteMany({userId: new ObjectId(id)})
+
         return res.status(204).end()
 
     } catch (err){
@@ -115,4 +119,18 @@ accountRoute.put('/accountUpdate/:id', async (req, res, next) => {
         console.log(err)
         return res.status(400).send({message: 'invalid fields'}).end()
     }
+})
+
+accountRoute.get('/accountActivate/:userId', async (req, res) => {
+    const { userId } = req.params
+
+    const user = await db.collection('login').findOne({_id: new ObjectId(userId)})
+
+    if (!user){
+        return res.status(404).send({message: 'Usuário não encontrado'}).end();
+    }
+
+    await db.collection('login').updateOne({_id: new ObjectId(userId)}, {$set: {isValidated: true}});
+
+    return res.status(200).send({message: 'Conta ativada!'}).end();
 })
