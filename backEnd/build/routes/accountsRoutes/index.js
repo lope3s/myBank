@@ -45,16 +45,17 @@ var db_1 = require("../../db");
 var checkUserService_1 = __importDefault(require("../../services/checkUserService"));
 var passwordHash_1 = __importDefault(require("../../services/passwordHash"));
 var mongodb_1 = require("mongodb");
+var mailerService_1 = require("../../services/mailerService");
 var db = db_1.client.db();
 exports.accountRoute = express_1.default.Router();
 exports.accountRoute.post('/accountRegister', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var _a, name_1, email, password, userAlreadyExist, passHash, err_1;
+    var _a, name_1, email_1, password, userAlreadyExist, passHash, err_1;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
                 _b.trys.push([0, 2, , 3]);
-                _a = req.body, name_1 = _a.name, email = _a.email, password = _a.password;
-                return [4 /*yield*/, (0, checkUserService_1.default)("login", email)];
+                _a = req.body, name_1 = _a.name, email_1 = _a.email, password = _a.password;
+                return [4 /*yield*/, (0, checkUserService_1.default)("login", email_1)];
             case 1:
                 userAlreadyExist = _b.sent();
                 passHash = (0, passwordHash_1.default)(password);
@@ -62,16 +63,17 @@ exports.accountRoute.post('/accountRegister', function (req, res) { return __awa
                     return [2 /*return*/, res.status(400).send({ message: 'Senha não pode ser vazia' }).end()];
                 if (!userAlreadyExist) {
                     db.collection("login").insertOne({
-                        email: email,
-                        password: passHash
+                        email: email_1,
+                        password: passHash,
+                        isValidated: false
                     }).then(function (resp) {
                         db.collection("users").insertOne({
                             userId: resp.insertedId,
                             name: name_1,
                             goals: []
                         });
+                        (0, mailerService_1.sendMail)(email_1, "https://localhost:5001/apiMyBank/accountActivate/" + resp.insertedId);
                     });
-                    //adicionar o serviço de mailer
                     return [2 /*return*/, res.status(201).send({ message: 'Usuários registrado!' }).end()];
                 }
                 return [2 /*return*/, res.status(400).send({ message: 'E-mail já cadastrado' }).end()];
@@ -83,12 +85,12 @@ exports.accountRoute.post('/accountRegister', function (req, res) { return __awa
         }
     });
 }); });
-exports.accountRoute.delete('/accoutDelete/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+exports.accountRoute.delete('/accountDelete/:id', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var id, err_2;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 3, , 4]);
+                _a.trys.push([0, 4, , 5]);
                 id = req.params.id;
                 return [4 /*yield*/, db.collection('login').deleteOne({ _id: new mongodb_1.ObjectId(id) })
                         .then(function (resp) {
@@ -98,18 +100,18 @@ exports.accountRoute.delete('/accoutDelete/:id', function (req, res) { return __
                     })];
             case 1:
                 _a.sent();
-                return [4 /*yield*/, db.collection('users').deleteOne({ userId: new mongodb_1.ObjectId(id) })
-                    //adicionar o delete em transações da conta
-                ];
+                return [4 /*yield*/, db.collection('users').deleteOne({ userId: new mongodb_1.ObjectId(id) })];
             case 2:
                 _a.sent();
-                //adicionar o delete em transações da conta
-                return [2 /*return*/, res.status(204).end()];
+                return [4 /*yield*/, db.collection('transactions').deleteMany({ userId: new mongodb_1.ObjectId(id) })];
             case 3:
+                _a.sent();
+                return [2 /*return*/, res.status(204).end()];
+            case 4:
                 err_2 = _a.sent();
                 console.log(err_2);
                 return [2 /*return*/, res.status(500).send({ message: 'internal error' }).end()];
-            case 4: return [2 /*return*/];
+            case 5: return [2 /*return*/];
         }
     });
 }); });
@@ -171,6 +173,25 @@ exports.accountRoute.put('/accountUpdate/:id', function (req, res, next) { retur
                 console.log(err_3);
                 return [2 /*return*/, res.status(400).send({ message: 'invalid fields' }).end()];
             case 12: return [2 /*return*/];
+        }
+    });
+}); });
+exports.accountRoute.get('/accountActivate/:userId', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var userId, user;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                userId = req.params.userId;
+                return [4 /*yield*/, db.collection('login').findOne({ _id: new mongodb_1.ObjectId(userId) })];
+            case 1:
+                user = _a.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(404).send({ message: 'Usuário não encontrado' }).end()];
+                }
+                return [4 /*yield*/, db.collection('login').updateOne({ _id: new mongodb_1.ObjectId(userId) }, { $set: { isValidated: true } })];
+            case 2:
+                _a.sent();
+                return [2 /*return*/, res.status(200).send({ message: 'Conta ativada!' }).end()];
         }
     });
 }); });

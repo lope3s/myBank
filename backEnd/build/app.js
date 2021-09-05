@@ -46,18 +46,33 @@ var goalsRoutes_1 = require("./routes/goalsRoutes");
 var transactionRoutes_1 = require("./routes/transactionRoutes");
 var db_1 = require("./db");
 var body_parser_1 = __importDefault(require("body-parser"));
+var mailerService_1 = require("./services/mailerService");
+var loginRoute_1 = require("./routes/loginRoute");
 var app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(body_parser_1.default.json());
 app.use('/apiMyBank', accountsRoutes_1.accountRoute);
 app.use('/apiMyBank', goalsRoutes_1.goalRoute);
 app.use('/apiMyBank/', transactionRoutes_1.transactionRoute);
+app.use('/apiMyBank', loginRoute_1.loginRoute);
 app.listen(5001, function () { return __awaiter(void 0, void 0, void 0, function () {
+    var transporter;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0: return [4 /*yield*/, (0, db_1.main)()];
             case 1:
                 _a.sent();
+                return [4 /*yield*/, (0, mailerService_1.makeTransport)()];
+            case 2:
+                transporter = _a.sent();
+                transporter.verify(function (err, _succes) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    else {
+                        console.log('\nMailer service is ON.');
+                    }
+                });
                 console.log("\nServer running on port 5001");
                 return [2 /*return*/];
         }
