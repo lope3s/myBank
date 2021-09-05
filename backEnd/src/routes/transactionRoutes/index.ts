@@ -24,7 +24,7 @@ transactionRoute.post('/createTransaction', async(req, res) => {
 
         await db.collection('transactions').insertOne(transactionObject)
 
-        const user = db.collection('users').findOne({userId: new ObjectId(userId)}) as unknown as IUser
+        const user = await db.collection('users').findOne({userId: new ObjectId(userId)}) as unknown as IUser
 
         let transactionGoal = user.goals.find(goal => goal.goalId === parseInt(goalId))
 

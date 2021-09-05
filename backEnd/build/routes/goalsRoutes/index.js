@@ -122,19 +122,20 @@ exports.goalRoute.put('/goalUpdate/:userId/:goalId', function (req, res, next) {
                 return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
             case 1:
                 user = _b.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(400).send({ message: 'Usuário não encontrado' }).end()];
+                }
                 goal_1 = user.goals.filter(function (goal) { return goal.goalId === parseInt(goalId_1); })[0];
                 Object.keys(req.body).forEach(function (value) {
+                    if (value === 'dueDate') {
+                        var goalDate = new Date();
+                        goalDate.setMonth(goalDate.getMonth() + req.body.dueDate);
+                        req.body.dueDate = goalDate;
+                    }
                     goal_1[value] = req.body[value];
                 });
-                console.log(goal_1);
-                goals = user.goals.filter(function (goal) {
-                    console.log('teste', goal.goalId, goalId_1);
-                    if (goal.goalId !== parseInt(goalId_1)) {
-                        return goal;
-                    }
-                });
+                goals = user.goals.filter(function (goal) { return goal.goalId !== parseInt(goalId_1); });
                 goals.push(goal_1);
-                debugger;
                 return [4 /*yield*/, db.collection('users').updateOne({ userId: new mongodb_1.ObjectId(userId) }, { $set: { goals: goals } })];
             case 2:
                 _b.sent();
@@ -144,6 +145,54 @@ exports.goalRoute.put('/goalUpdate/:userId/:goalId', function (req, res, next) {
                 console.log(err_2);
                 return [2 /*return*/, res.status(400).send({ message: 'invalid fields' }).end()];
             case 4: return [2 /*return*/];
+        }
+    });
+}); });
+exports.goalRoute.delete('/goalDelete/:userId/:goalId', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var _a, userId, goalId_2, user, goals, err_3;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                _b.trys.push([0, 3, , 4]);
+                _a = req.params, userId = _a.userId, goalId_2 = _a.goalId;
+                return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
+            case 1:
+                user = _b.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(400).send({ message: 'Usuário não encontrado' }).end()];
+                }
+                goals = user.goals.filter(function (goal) { return goal.goalId !== parseInt(goalId_2); });
+                return [4 /*yield*/, db.collection('users').updateOne({ userId: new mongodb_1.ObjectId(userId) }, { $set: { goals: goals } })];
+            case 2:
+                _b.sent();
+                return [2 /*return*/, res.status(204).end()];
+            case 3:
+                err_3 = _b.sent();
+                console.log(err_3);
+                return [2 /*return*/, res.status(500).send({ message: 'something went wrong' }).end()];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); });
+exports.goalRoute.get('/goalsList/:userId', function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var userId, user, err_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                userId = req.params.userId;
+                return [4 /*yield*/, db.collection('users').findOne({ userId: new mongodb_1.ObjectId(userId) })];
+            case 1:
+                user = _a.sent();
+                if (!user) {
+                    return [2 /*return*/, res.status(404).send({ message: 'Usuário não encontrado' }).end()];
+                }
+                return [2 /*return*/, res.status(200).send({ goals: user.goals }).end()];
+            case 2:
+                err_4 = _a.sent();
+                console.log(err_4);
+                return [2 /*return*/, res.status(500).send({ message: 'something went wrong' }).end()];
+            case 3: return [2 /*return*/];
         }
     });
 }); });
