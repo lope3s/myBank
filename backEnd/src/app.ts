@@ -6,7 +6,7 @@ import { transactionRoute } from './routes/transactionRoutes';
 import { main } from './db';
 import bodyParser from 'body-parser';
 import { makeTransport } from './services/mailerService';
-import { loginRoute } from './routes/loginRoute';
+import { accessRoute } from './routes/accesRoutes';
 
 const app = express();
 
@@ -20,7 +20,7 @@ app.use('/apiMyBank', goalRoute)
 
 app.use('/apiMyBank/', transactionRoute)
 
-app.use('/apiMyBank', loginRoute)
+app.use('/apiMyBank', accessRoute)
 
 app.listen(5001, async () => {
     await main();
