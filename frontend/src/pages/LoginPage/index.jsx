@@ -23,7 +23,10 @@ import { RiLockPasswordFill } from "react-icons/ri";
 
 import Logo from "../../images/LogoMyBank.png";
 
+import { useStore } from "easy-peasy";
+
 const LoginPage = () => {
+  const user = useStore();
   const [formState, setFormState] = useState("login");
 
   const loginContainer = useRef();
@@ -37,7 +40,7 @@ const LoginPage = () => {
   } = useForm();
 
   const onSubmit = (data) => {
-    console.log(data);
+    console.log(user.getState().user);
     if (Object.keys(data).length > 2) {
       axios
         .post("http://localhost:5001/apiMyBank/accountRegister", {

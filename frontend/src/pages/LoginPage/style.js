@@ -121,7 +121,7 @@ export const ErrorMessage = styled.p`
 
 export const RegisterForm = styled.form`
   width: 100%;
-  height: 19rem;
+  height: 17rem;
 
   display: flex;
   flex-direction: column;
