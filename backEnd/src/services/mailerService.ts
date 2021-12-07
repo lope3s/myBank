@@ -1,31 +1,15 @@
 import { createTransport } from "nodemailer";
-import { google } from 'googleapis';
 import makeHtml from "./makeHtml";
-
-const oAuthCli = new google.auth.OAuth2(
-    process.env.OAUTH_CLIENT_ID, 
-    process.env.OAUTH_CLIENT_SECRET, 
-    process.env.OAUTH_REDIRECT_URI
-)
-
-oAuthCli.setCredentials({refresh_token: process.env.OAUTH_REFRESH_TOKEN})
 
 export const makeTransport = async () => {
 
-    
-    const accesToken = await oAuthCli.getAccessToken() as string
-
     const transporter = createTransport({
         host: 'smtp.gmail.com',
-        port: 465,
-        secure: true,
+        port: 587,
+        secure: false,
         auth: {
-            type: 'OAuth2',
             user: process.env.MAILER_USER,
-            clientId: process.env.OAUTH_CLIENT_ID,
-            clientSecret: process.env.OAUTH_CLIENT_SECRET,
-            refreshToken: process.env.OAUTH_REFRESH_TOKEN,
-            accessToken: accesToken
+            pass: process.env.MAILER_PASS
         }
     })
 
