@@ -13,3 +13,6 @@ Then run `yarn` to install project dependencies and to run:
     yarn dev
 ```
 This will build typescript and run the server.
+
+## Get Started - Front-End
+Just run `yarn` then `yarn start` to install dependencies and run the app.
