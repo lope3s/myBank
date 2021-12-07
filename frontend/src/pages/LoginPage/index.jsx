@@ -31,6 +31,7 @@ import { useParams, Redirect } from "react-router-dom";
 import { useStoreState, useStoreActions } from "easy-peasy";
 import checkEnvironment from "../../keys";
 import ModalServerResponse from '../../components/modalServerResponse';
+import { LoadingComponent } from '../../components/LoadingComponent';
 
 const LoginPage = () => {
   const { isLogged, isChanging } = useStoreState((store) => store);
@@ -40,7 +41,8 @@ const LoginPage = () => {
   const { activationcode } = useParams();
   const [ activeServerModal, setActiveServerModal ] = useState({activate: false, message: '', status: false});
   const [ accounteActivated, setAccountActivated ] = useState(false);
-  console.log('teste: ', isLogged)
+  const [ isLoading, setIsLoading ] = useState(false)
+
 
   if (activationcode !== undefined && !accounteActivated) {
     axios
@@ -79,6 +81,7 @@ const LoginPage = () => {
     console.log(`${checkEnvironment(process.env.REACT_APP_STAGE).envUrl}`)
 
     if (Object.keys(data).length > 2) {
+      setIsLoading(true)
       axios
         .post(`${checkEnvironment(process.env.REACT_APP_STAGE).envUrl}/accountRegister`, {
           name: data.Registernome,
@@ -86,6 +89,7 @@ const LoginPage = () => {
           password: data.Registerpassword,
         })
         .then((res) => {
+          setIsLoading(false)
           unregister("Registerpassword");
           unregister("RegisterconfirmPassword");
           unregister("Registeremail");
@@ -120,6 +124,7 @@ const LoginPage = () => {
           );
         })
         .catch((err) => {
+          setIsLoading(false)
           console.log(err.response);
           setActiveServerModal({activate: true, message: err.response.data.message, status: false})
 
@@ -186,6 +191,7 @@ const LoginPage = () => {
 
   return (
     <>
+      { isLoading && <LoadingComponent/>}
       <MainContainer>
         <LoginContainer ref={loginContainer}>
           <img alt="logo" src={Logo}></img>

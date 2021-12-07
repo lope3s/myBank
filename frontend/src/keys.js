@@ -1,4 +1,4 @@
-const checkEnvironment = (environment = "stag") => {
+const checkEnvironment = (environment = "dev") => {
     if (environment === "dev") {
         return {
         envName: "dev",

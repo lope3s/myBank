@@ -2,24 +2,22 @@ import { createTransport } from "nodemailer";
 import makeHtml from "./makeHtml";
 
 export const makeTransport = async () => {
-        .then(res => {
-            const transporter = createTransport({
-                host: 'smtp.gmail.com',
-                port: 587,
-                secure: false,
-                auth: {
-                    user: process.env.MAILER_USER,
-                    pass: process.env.MAILER_PASS
-                }
-            })
+    try{
+        const transporter = createTransport({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.MAILER_USER,
+                pass: process.env.MAILER_PASS
+            }
+        })
         
             return transporter
             
-        }).catch(err => {
+        } catch(err) {
             console.log(err, "\n\nMailler service had a problem to start")
-        })
-
-    return transporter
+        }
 }
 
 

@@ -1,8 +1,6 @@
 import { Container, CenterContainer, LoadingBox } from "./style"
 
 export const LoadingComponent = (shrink) => {
-
-    console.log(shrink)
     return (
         <Container shrink = {shrink}>
             <CenterContainer>
