@@ -11,7 +11,7 @@ You will need to add a hash secret and you will need a mongoDB uri, you can use 
 ```plaintext
     MONGO_URI = mongodb+srv://mybank:mybank@mybank.dnr2v.mongodb.net/myBank?retryWrites=true&w=majority
 ```
-Please, remember if you're going to use this uri, DO NOT use sensible data, this is a pulic db.  
+Please, remember if you're going to use this uri, DO NOT use sensible data, this is a public db.  
 Then run `yarn` to install project dependencies and to run:
 ```bash
     yarn dev
