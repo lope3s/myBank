@@ -7,7 +7,11 @@ This app works around an email authenticaded login feature, so to run this app y
     MAILER_USER = noresponsemybank@gmail.com
     MAILER_PASS = 123456,.;
 ```
-You will need to add a hash secret and your mongoDB URI to .env as well.  
+You will need to add a hash secret and you will need a mongoDB uri, you can use this public uri or if the uri is inactive you can create your on mongoDB URI to .env as well.
+```plaintext
+    MONGO_URI = mongodb+srv://mybank:mybank@mybank.dnr2v.mongodb.net/myBank?retryWrites=true&w=majority
+```
+Please, remember if you're going to use this uri, DO NOT use sensible data, this is a pulic db.  
 Then run `yarn` to install project dependencies and to run:
 ```bash
     yarn dev
